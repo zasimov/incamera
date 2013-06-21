@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./mdat-skipper | mplayer -cache 8192 -
+

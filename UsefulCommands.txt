@@ -1,0 +1,6 @@
+Run streamed mplayer
+  $ nc -l -p 8081 -e "./mp"
+
+Save stream into file
+  $ nc -l -p 8081 > filename
+

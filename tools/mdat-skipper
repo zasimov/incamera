@@ -1,0 +1,19 @@
+#!/usr/bin/python -u
+
+import sys
+
+s = ""
+mdat_found = False
+while True:
+    a = sys.stdin.read(81920)
+    if not a:
+        break
+    if not mdat_found:
+        s += a
+        if 'mdat' in s:
+            pos = s.index('mdat')
+            sys.stdout.write(s[pos:])
+        mdat_found = True
+    else:
+        sys.stdout.write(a)
+
