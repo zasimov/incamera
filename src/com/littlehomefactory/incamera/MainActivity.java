@@ -208,15 +208,18 @@ public class MainActivity extends Activity
 	try {
 	    InetAddress serverAddr = InetAddress.getByName("192.168.1.51");
 	    m_socket = new Socket(serverAddr, 8081);
+	    m_camera_message.setText("Connected");
 	} catch (Exception e) {
 	    // TODO(zasimov): catch exceptions
 	    m_camera_message.setText("Connect failed");
-	    return false;
 	}
-	m_camera_message.setText("Connected");
 
-	ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(m_socket);
-	m_recorder.setOutputFile(pfd.getFileDescriptor());
+	if (m_socket != null) {
+	    ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(m_socket);
+	    m_recorder.setOutputFile(pfd.getFileDescriptor());
+	} else {
+	    m_recorder.setOutputFile("/sdcard/incamera.mp4");
+	}
 
 	//recorder.setPreviewDisplay(mPreview.getHolder().getSurface());
 
