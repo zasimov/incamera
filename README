@@ -5,17 +5,19 @@ Initial commit features
   - exit button
   - screen keep on
   - no window title
-  - localserver and local sockets (not used)
-  - test feature: video streaming into socket (192.168.1.51:8081)
-  - video settings: MPEG_4 + H263, 640x480
+  - localserver and local sockets
+  - test feature: video streaming into socket (192.168.1.50:8081)
+  - video settings: 3GPP + H263, 640x480
   - video encoding bit rate: 1024 ** 2
   - audio settings: AAC
   - audio encoding bit rate: 320000
   - audio sampling rate: 48000
+  - rtp streaming with sequentor
 
 Bugs:
-  - samsung freezing
+  - samsung freezing (?)
   - no audio
-  - video too fast
-  - fatal error if server is not running
+  - video too fast (?)
+  - fatal error if server is not running (?)
+  - crash with close
 

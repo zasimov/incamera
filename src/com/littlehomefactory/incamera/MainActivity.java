@@ -32,12 +32,15 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.littlehomefactory.incamera.rtp.RTPStream;
+
 
 public class MainActivity extends Activity 
   implements CameraView.CameraReadyCallback {
     private Camera m_camera = null;
 
     private StreamMediaRecorder m_recorder = null;
+    private RTPStream rtp_stream = null;
     private boolean m_recording = false;
 
     private FrameLayout m_camera_preview = null;
@@ -46,11 +49,9 @@ public class MainActivity extends Activity
     private LocalServerSocket m_server = null;
     private LocalSocket m_recv_gate;
 
-    private Socket m_socket = null;
-
     // Constants
     private final String SERVER_ADDRESS = "incamera_socket";
-    private final int BUFFER_SIZE = 4098;
+    private final int BUFFER_SIZE = 50000;
 
     public final String TAG = "com.littlehomefactory.incamera.MainActivity";
 
@@ -70,6 +71,7 @@ public class MainActivity extends Activity
 	    m_recv_gate = new LocalSocket();
 	    m_recv_gate.connect(m_server.getLocalSocketAddress());
 	    m_recv_gate.setReceiveBufferSize(BUFFER_SIZE);
+	    rtp_stream = new RTPStream(m_recv_gate.getInputStream());
 	} catch (IOException e) {
 	    // TODO(zasimov): log message
 	    try {
@@ -130,6 +132,12 @@ public class MainActivity extends Activity
 	}
 
 	m_recorder.start();
+	try {
+	    rtp_stream.start();
+	} catch (IOException e) {
+	    // pass
+	    Log.d(TAG, "RTP Stream start failed");
+	}
 	m_recording = true;
     }
 
@@ -142,12 +150,7 @@ public class MainActivity extends Activity
         releaseMediaRecorder();       // if you are using MediaRecorder, release it first
         releaseCamera();
 
-	if (m_socket != null)
-	    try {
-		m_socket.close();
-	    } catch (IOException e) {
-		// pass
-	    }
+	rtp_stream.stop();
 
 	try {
 	    if (m_recv_gate != null)
@@ -204,22 +207,6 @@ public class MainActivity extends Activity
 	if (m_recorder == null || m_camera == null)
 	    // TODO(zasimov): log message
 	    return false;
-
-	try {
-	    InetAddress serverAddr = InetAddress.getByName("192.168.1.51");
-	    m_socket = new Socket(serverAddr, 8081);
-	    m_camera_message.setText("Connected");
-	} catch (Exception e) {
-	    // TODO(zasimov): catch exceptions
-	    m_camera_message.setText("Connect failed");
-	}
-
-	if (m_socket != null) {
-	    ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(m_socket);
-	    m_recorder.setOutputFile(pfd.getFileDescriptor());
-	} else {
-	    m_recorder.setOutputFile("/sdcard/incamera.mp4");
-	}
 
 	//recorder.setPreviewDisplay(mPreview.getHolder().getSurface());
 

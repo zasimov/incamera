@@ -35,10 +35,13 @@ public class StreamMediaRecorder extends MediaRecorder {
 	
 	// Output format (video)
 	// TODO(zasimov): move this settings to settings window
-	setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-	//setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+	//setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+	/* 
+	 * 3gpp container contains raw H.263/H.264 stream.
+	 */
+	setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 	setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-	setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+	setVideoEncoder(MediaRecorder.VideoEncoder.H263);
 	setVideoSize(640, 480);
 	setVideoFrameRate(20);
 	setVideoEncodingBitRate(1024*1024);
