@@ -51,7 +51,7 @@ public class MainActivity extends Activity
 
     // Constants
     private final String SERVER_ADDRESS = "incamera_socket";
-    private final int BUFFER_SIZE = 50000;
+    private final int BUFFER_SIZE = 500000;
 
     public final String TAG = "com.littlehomefactory.incamera.MainActivity";
 

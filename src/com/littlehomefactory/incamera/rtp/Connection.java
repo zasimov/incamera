@@ -16,8 +16,12 @@ public class Connection implements Runnable {
 
     static private final String TAG = "com.littlehomefactory.incamera.rtp.Connection";
 
+    static private String ip;
+    static private int port;
+
     public Connection() {
-	
+	this.ip = "192.168.1.52";
+	this.port = 8081;
     }
     
     public void start() {
@@ -62,8 +66,8 @@ public class Connection implements Runnable {
 	Log.d(TAG, "Try connect to server");
 	setDisconnected();
 	try {
-	    InetAddress address = InetAddress.getByName("192.168.1.50");
-	    socket = new Socket(address, 8081);
+	    InetAddress address = InetAddress.getByName(this.ip);
+	    socket = new Socket(address, this.port);
 	    setConnected();
 	    Log.d(TAG, "Connected");
 	} catch (Exception e) {

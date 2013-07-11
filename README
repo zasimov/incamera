@@ -14,10 +14,14 @@ Initial commit features
   - audio sampling rate: 48000
   - rtp streaming with sequentor
 
+Features:
+  Send RTP stream over TCP on 192.168.1.52:8081.
+
 Bugs:
   - samsung freezing (?)
   - no audio
   - video too fast (?)
   - fatal error if server is not running (?)
   - crash with close
+  - crash when the phone rings
 

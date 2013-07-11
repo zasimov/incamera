@@ -61,7 +61,7 @@ public class RTPStream extends LittleEndianBuffer implements Runnable {
 	this.setLong(RTP_HDR_START + 4, RTP_HDR_START + 8, timestamp);
     }
 
-    public void markPacket() {
+    public void setPacketSequenceNumber() {
 	this.setLong(RTP_HDR_START + 2, RTP_HDR_START + 4, ++this.sequence_n);
     }
 
@@ -96,9 +96,11 @@ public class RTPStream extends LittleEndianBuffer implements Runnable {
 
     private void sendStream() throws IOException {
 	long time = 0;
+	long ts = 0;
 	long duration = 0;
 	boolean stream_found = false;
 	boolean new_frame_found = false;
+	Statistics stats = new Statistics();
 
 	this.setByte(RTP_HDR_START, (byte) 0x80);  // v=2
 	this.setByte(RTP_HDR_START+1, (byte) 96);    // dynamic payload
@@ -110,6 +112,7 @@ public class RTPStream extends LittleEndianBuffer implements Runnable {
 	buffer[H263_HDR_START + 1] = 0;
 
 	while (!Thread.interrupted()) {
+	    // 1 * 10^9 == 1 sec
 	    time = System.nanoTime();
 
 	    if (sequentor.fill() <= 0) {
@@ -128,6 +131,10 @@ public class RTPStream extends LittleEndianBuffer implements Runnable {
 		    if (previous_frame_exist) {
 			// Send previous frame
 			previous_frame[RTP_HDR_START + 1] += 0x80; // mark last packet;
+			stats.push(duration);
+			ts += stats.average()*9/100000;
+			setTimestamp(ts);
+			duration = 0;
 			sendPreviousFrame();
 		    } else {
 			buffer[H263_HDR_START] = 4;
@@ -140,12 +147,14 @@ public class RTPStream extends LittleEndianBuffer implements Runnable {
 
 		previous_frame_exist = true;
 		previous_frame_size = sequentor.getFrameSize();
+		setPacketSequenceNumber();
 		setLong(0, 2, previous_frame_size);
 		buffer[2] = (byte) 0x93;
 		buffer[3] = (byte) 0x94;
+		// TODO (zasimov): swap buffer instead of copy
 		System.arraycopy(buffer, 0,
 				 previous_frame, 0,
-				 sequentor.getFrameSize());
+				 buffer.length);
 
 	    }
 	}
@@ -174,4 +183,24 @@ public class RTPStream extends LittleEndianBuffer implements Runnable {
 		break;
 	}
     }
+
+    protected static class Statistics {
+	public final static int COUNT=50;
+	private float m = 0, q = 0;
+
+	public void init(long value) {
+	    m = value;
+	    q = COUNT;
+	}
+
+	public void push(long duration) {
+	    m = (m*q+duration)/(q+1);
+	    if (q<COUNT) q++;
+	}
+
+	public long average() {
+	    return (long)m;
+	}
+    }
+
 }
