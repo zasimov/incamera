@@ -17,6 +17,11 @@ Initial commit features
 Features:
   Send RTP stream over TCP on 192.168.1.52:8081.
 
+  Packet format:
+    2 bytes: packet length
+    2 bytes: control sequence (9394)
+    other: RTP packet with H.263 header
+
 Bugs:
   - samsung freezing (?)
   - no audio
