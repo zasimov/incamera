@@ -1,27 +1,57 @@
 #!/usr/bin/python
 
 import socket
+import struct
+import sys
 import time
 
 MTU = 512
 
 if __name__ == "__main__":
-    UDP_IP = "127.0.0.1"
-    UDP_PORT = 5005
+    #UDP_IP = "127.0.0.1"
+    UDP_IP = '<broadcast>'
+    UDP_PORT = 5554
     print "UDP target IP:", UDP_IP
     print "UDP target port:", UDP_PORT
 
     sock = socket.socket(socket.AF_INET, # Internet
                          socket.SOCK_DGRAM) # UDP
+    sock.bind(('', 0))
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-    f = open("/home/zasimov/tmp/videos/rtp.mp4", "rb")
+    print "Read from %s" % sys.argv[1]
+    if sys.argv[1] == '-':
+        f = sys.stdin
+    else:
+        f = open(sys.argv[1], "rb")
     n = 0
+    ts = None
     while True:
-        buf = f.read(MTU)
-        if not buf:
+        packet_size = struct.unpack('BB', f.read(2))
+        packet_size = packet_size[0] * 256 + packet_size[1]
+        print packet_size
+        if packet_size is None: 
             break
+        check = struct.unpack('BB', f.read(2))
+        if check[0] != 0x93 or check[1] != 0x94:
+            print 'bad control sequence: %s %s' % (repr(check[0]), repr(check[1]))
+            exit(1)
+        buf = f.read(packet_size - 4)
         sock.sendto(buf, (UDP_IP, UDP_PORT)) 
-	time.sleep(1)
+        current_ts = struct.unpack('BBBB', buf[3:7])
+        current_ts = current_ts[3] + current_ts[2] * 256 + current_ts[1] * 256 ** 2 + \
+                     current_ts[0] * 256 ** 3
+        if sys.argv[1] != '-':
+            if ts is None:
+                time.sleep(0.002)
+            else:
+                delay = (float(current_ts) - float(ts)) / 10 ** 9
+                delay = delay / 9.0
+                print "Sleep %s" % delay
+                delay = 0.002 if delay < 0 else delay
+                time.sleep(delay)
+            ts = current_ts
+            
         print "packet %s" % n
         n += 1
 
