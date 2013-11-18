@@ -13,7 +13,7 @@ public class LittleEndianBuffer {
     }
 
     public void setByte(int index, byte b) {
-	if (index >= this.size)
+	if (index < 0 || index >= this.size)
 	    throw new IndexOutOfBoundsException();
 	buffer[index] = b;
     }
@@ -24,8 +24,8 @@ public class LittleEndianBuffer {
 
     public void setLong(int begin, int end, long n) {
 	end--;
-	if (end >= this.size)
-	    throw new IndexOutOfBoundsException();
+	if (begin < 0 || begin > end || end < 0 || end >= this.size)
+		throw new IndexOutOfBoundsException();
 	while (end >= begin) {
 	    buffer[end] = (byte) (n % 256);
 	    n >>= 8;
